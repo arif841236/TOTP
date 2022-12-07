@@ -13,6 +13,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class SendOtpRequest {
+
 	private String type;
 	@EmailOrPhone
 	private String typeValue;

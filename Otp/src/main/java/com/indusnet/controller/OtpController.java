@@ -28,7 +28,7 @@ public class OtpController {
 
 	@Autowired
 	Gson gson;
-	
+
 	@Autowired
 	ResponeUtil responseUtil;
 
@@ -42,13 +42,10 @@ public class OtpController {
 	 * @param user: This is user store the name , email , and mobile number
 	 * @return :its return responceEntity of OtpResponseMessage.
 	 */
- 
+
 	@PostMapping("/sendotp")
 	public ResponseEntity<OtpSendResponse> sendOtpHandler(@RequestBody @Valid SendOtpRequest user){
-     System.out.println("requeston is "+user.getRequeston());
-		//SendOtpRequest otpRequest = gson.fromJson(user, SendOtpRequest.class);
 		OtpData otpData = userService.generateOtp(user);
-		
 		OtpSendResponse responce = responseUtil.response("OTP generated successfully", otpData);
 		return ResponseEntity.ok().body(responce);
 	}
@@ -65,7 +62,6 @@ public class OtpController {
 	@PostMapping("/validateotp")
 	public ResponseEntity<ValidationResponce> verifyOtpHandler(@RequestBody  String validateReq){
 		ValidateRequest validateRequest = gson.fromJson(validateReq, ValidateRequest.class);
-		
 		ValidationResponce message = userService.validate(validateRequest);
 		return ResponseEntity.ok().body(message);
 	}
@@ -84,12 +80,11 @@ public class OtpController {
 	@PostMapping("/resendotp")
 	public ResponseEntity<OtpSendResponse> resendOtpHandler(@RequestBody String request){
 		ResendRequest resendRequest = gson.fromJson(request, ResendRequest.class);
-		
 		OtpData otpData = userService.resend(resendRequest);
 		OtpSendResponse responce = responseUtil.response("OTP generated successfully", otpData);
 		return ResponseEntity.ok().body(responce);
 	}
- 
+
 	/*
 	 * This is constructor to initialize the userService and responseUtil
 	 */

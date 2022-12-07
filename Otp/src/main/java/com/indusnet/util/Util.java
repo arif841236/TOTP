@@ -18,21 +18,21 @@ public class Util {
 
 	= { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
 
-/**
- * This is No argument constructor
- * which call all methods.
- */
+	/**
+	 * This is No argument constructor
+	 * which call all methods.
+	 */
 	private Util() {
 	}
 
-	 /**
-     * HMAC computes a Hashed Message Authentication Code with the
-     * crypto hash algorithm as a parameter.
-     * @param crypto: the crypto algorithm (HmacSHA1, HmacSHA256,
-     *                             HmacSHA512)
-     * @param keyBytes: the bytes to use for the HMAC key
-     * @param text: the message or text to be authenticated
-     */
+	/**
+	 * HMAC computes a Hashed Message Authentication Code with the
+	 * crypto hash algorithm as a parameter.
+	 * @param crypto: the crypto algorithm (HmacSHA1, HmacSHA256,
+	 *                             HmacSHA512)
+	 * @param keyBytes: the bytes to use for the HMAC key
+	 * @param text: the message or text to be authenticated
+	 */
 	private static byte[] hmacSha(String crypto, byte[] keyBytes, byte[] text) {
 		try {
 			Mac hmac;
@@ -46,10 +46,10 @@ public class Util {
 	}
 
 	/**
-     * This method converts a HEX string to Byte[]
-     * @param hex: the HEX string
-     * @return: a byte array
-     */
+	 * This method converts a HEX string to Byte[]
+	 * @param hex: the HEX string
+	 * @return: a byte array
+	 */
 	private static byte[] hexStr2Bytes(String hex) {
 		byte[] bArray = new BigInteger("10" + hex, 16).toByteArray();
 
@@ -58,17 +58,15 @@ public class Util {
 			ret[i] = bArray[i + 1];
 		return ret;
 	}
-	
-	
 
 	/**
-     * This method generates a TOTP value for the given
-     * set of parameters.
-     * @param key: the shared secret, HEX encoded
-     * @param time: a value that reflects a time
-     * @param returnDigits: number of digits to return
-     * @return: a numeric String digits
-     */
+	 * This method generates a TOTP value for the given
+	 * set of parameters.
+	 * @param key: the shared secret, HEX encoded
+	 * @param time: a value that reflects a time
+	 * @param returnDigits: number of digits to return
+	 * @return: a numeric String digits
+	 */
 	public static String generateTOTP256(String key, Integer time, String returnDigits) {
 		String steps ;
 		long t = (time - 0)/30;
@@ -80,14 +78,14 @@ public class Util {
 	}
 
 	/**
-     * This method generates a TOTP value for the given
-     * set of parameters.
-     * @param key: the shared secret, HEX encoded
-     * @param time: a value that reflects a time
-     * @param returnDigits: number of digits to return
-     * @param crypto: the crypto function to use
-     * @return: a numeric String  digits
-     */
+	 * This method generates a TOTP value for the given
+	 * set of parameters.
+	 * @param key: the shared secret, HEX encoded
+	 * @param time: a value that reflects a time
+	 * @param returnDigits: number of digits to return
+	 * @param crypto: the crypto function to use
+	 * @return: a numeric String  digits
+	 */
 
 	public static String generateTOTP(String key, String time, String returnDigits, String crypto) {
 		int codeDigits = Integer.decode(returnDigits).intValue();
@@ -108,13 +106,10 @@ public class Util {
 
 		result = Integer.toString(otp);
 		while (result.length() < codeDigits) {
-			result = "0".concat(result);
+			result = "3".concat(result);
 
 		}
 		return result;
 	}
-
-
-
 
 }

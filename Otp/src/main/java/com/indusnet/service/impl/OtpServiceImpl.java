@@ -7,23 +7,17 @@ import com.indusnet.exception.OtpException;
 import com.indusnet.model.OtpData;
 import com.indusnet.model.ResendRequest;
 import com.indusnet.model.SendOtpRequest;
-import com.indusnet.model.UserModel;
 import com.indusnet.model.ValidateRequest;
+import com.indusnet.model.common.Type;
 import com.indusnet.model.common.ValidationResponce;
 import com.indusnet.repository.IOtpRepository;
-import com.indusnet.repository.IUserModelRepository;
 import com.indusnet.service.IOtpService;
-import com.indusnet.util.Base64Encoding;
-import com.indusnet.util.OtpSend;
-import com.indusnet.util.OtpSendToMail;
+import com.indusnet.util.OtpUtil;
 import com.indusnet.util.Util;
 import lombok.extern.slf4j.Slf4j;
-
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -38,21 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class OtpServiceImpl implements IOtpService {
 
 	@Autowired
-	IUserModelRepository userRepository2;
-
-	@Autowired
-	Base64Encoding base64Encoding;
-	
-	@Autowired
-	private OtpSend otpSend;
-
-	@Autowired
-	OtpSendToMail otpMail;
-
-	int secKeyValue = LocalDateTime.now().getNano();
-
-	LocalDateTime validationTime = LocalDateTime.now();
-
+	OtpUtil otpUtil;
 	String totp = null;
 	int resendCount = 0;
 	int generateCount = 0;
@@ -60,29 +40,6 @@ public class OtpServiceImpl implements IOtpService {
 	boolean isValidate = false;
 	@Autowired
 	private IOtpRepository userRepository;
-
-	/**
-	 * This Constructor initialize the userRepository
-	 * @param userRepository 
-	 */
-
-
-	public OtpServiceImpl(OtpSend otpSend, IOtpRepository userRepository, OtpSendToMail otpMail) {
-		super();
-		this.otpSend = otpSend;
-		this.userRepository = userRepository;
-		this.otpMail = otpMail;
-	}
-
-	public OtpServiceImpl(IOtpRepository userRepository) {
-		super();
-		this.userRepository = userRepository;
-	}
-	
-	public OtpServiceImpl() {
-		super();
-	}
-
 
 	/**
 	 * this method is generate the otp and 
@@ -93,93 +50,71 @@ public class OtpServiceImpl implements IOtpService {
 
 	@Override
 	public OtpData generateOtp(SendOtpRequest user) throws OtpException {
+		if(user.getType().equals("sms") && user.getTypeValue().contains("@gmail.com")) {
+			throw new OtpException();
+		}
+		if(user.getType().equals("email") && user.getTypeValue().length() == 10) {
+			throw new OtpException();
+		}
 		generateCount++;
-
 		validateCount = 0;
-
 		if(generateCount > 5) {
 			CompletableFuture.delayedExecutor(300, TimeUnit.SECONDS).execute(() -> generateCount = 0 );
-
 			throw new OtpException("you exceed the maximum number of attempt.");
 		}
-
-
-
-		//		String mobile = "";
-		//		if(user.getCountryCode() == null) {
-		//			mobile = "+91".concat(user.getMobile());
-		//		}
-		//		else
-		//			mobile = user.getCountryCode().concat(user.getMobile());
-		//
-		//		String message = "Dear customer, use this One Time Password (Number)"
-		//				+ " to log in to your (Company name) account."
-		//				+ " This OTP will be valid for the next 1 mins.Your OTP is "+otp;
-
-		// send otp to mobile
-		//otpSend.send(new UserDetail(mobile, message));
-
-		// send email
-		//otpMail.sendEmail(user.getEmail(), message);
 
 		Optional<OtpData> existedUser = userRepository.findByTypeValue(user.getTypeValue());
 		existedUser.ifPresentOrElse(x -> {
 
 			//Secret key
-			String secKey = Timestamp.valueOf(user.getTypeValue()).toString();
+			String secKey = user.getRequeston().toString();
 
 			log.info("secKey "+secKey);
 			// OTP generate 
-			String otp = Util.generateTOTP256(secKey,secKeyValue , "6");
+			String otp = Util.generateTOTP256(secKey,120 , "6");
 			log.info("OTP is :"+otp);
-			totp =base64Encoding.encode(Integer.parseInt(otp));
-			int validTime = Integer.parseInt(Timestamp.valueOf(LocalDateTime.now()).toString());
-			if(user.getRequeston() + 600 < validTime) {
-				totp = null;
-			}
+			totp =otpUtil.base64encode(Integer.parseInt(otp));
+			CompletableFuture.delayedExecutor(600, TimeUnit.SECONDS).execute(() -> totp = null );
+			Integer messageId = otpUtil.otpIdGenrate();
+			log.info("otpId is "+messageId);
 
 			OtpData newUserModel = OtpData.builder()
-					.messageId(x.getMessageId())
+					.id(x.getId())
+					.messageId(messageId)
 					.requestdevice(x.getRequestdevice())
-					.type(x.getType())
+					.type(Type.valueOf(user.getType().toUpperCase()))
 					.typeValue(x.getTypeValue())
 					.user(user.getUser())
-					.validUpto(user.getRequeston()+900)
-					.requeston(user.getRequeston())
+					.validupto(LocalDateTime.now().plusMinutes(10))
+					.requestedAt(LocalDateTime.now())
+					.otpGeneratedAt(LocalDateTime.now())
 					.build();
 			otpData=userRepository.save(newUserModel);
 		}
 		,() -> {
 
 			//Secret key
-			String secKey = ""+LocalDateTime.now().getNano();
+			String secKey = user.getRequeston().toString();
 
 			// OTP generate 
-			String otp = Util.generateTOTP256(secKey,secKeyValue , "6");
+			String otp = Util.generateTOTP256(secKey,120 , "6");
 			log.info("OTP is "+otp);
-			
-			totp =base64Encoding.encode(Integer.parseInt(otp));
 
-			if(validationTime.plusSeconds(900).isBefore(LocalDateTime.now())) {
-				totp = null;
-				validationTime = LocalDateTime.now().plusSeconds(900);
-			}
+			totp =otpUtil.base64encode(Integer.parseInt(otp));
+			CompletableFuture.delayedExecutor(600, TimeUnit.SECONDS).execute(() -> totp = null );
 
-			Integer messageId = 100000 + Math.abs(new Random().nextInt() * 899900);
-			while(messageId > 999999) {
-				messageId = messageId / 10;
-			}
+			Integer messageId = otpUtil.otpIdGenrate();
 			log.info("otpId is "+messageId);
-			String otpId =base64Encoding.encode(messageId);
-			
+
 			OtpData newUserModel = OtpData.builder()
 					.requestdevice(user.getRequestdevice())
-					.type(user.getType())
-					.messageId(otpId)
+					.type(Type.valueOf(user.getType().toUpperCase()))
+					.messageId(messageId)
 					.typeValue(user.getTypeValue())
 					.user(user.getUser())
-					.validUpto(user.getRequeston()+900)
-					.requeston(user.getRequeston())
+					.validupto(LocalDateTime.now().plusMinutes(10))
+					.otpGeneratedAt(LocalDateTime.now())
+					.requestedAt(LocalDateTime.now())
 					.build();
 			otpData=userRepository.save(newUserModel); 
 
@@ -187,10 +122,6 @@ public class OtpServiceImpl implements IOtpService {
 
 		return otpData;
 	}
-
-
-
-
 
 	/**
 	 * This method validate otp and 
@@ -204,15 +135,19 @@ public class OtpServiceImpl implements IOtpService {
 		if(validateCount > 3) 
 			throw new OtpException("you crossed maximum attempt for validation. Please resend the OTP for further validation");
 
-		String otpId =base64Encoding.encode(valiRequest.getOtpId());
-		OtpData otpDataDetails=userRepository.getOtpDataByMessageId(otpId);
-		String otp =base64Encoding.encode(valiRequest.getOtp());
+		OtpData otpDataDetails=userRepository.getOtpDataByMessageId(valiRequest.getOtpId());
+		String otp =otpUtil.base64encode(valiRequest.getOtp());
 
+		if(userRepository.findByMessageId(valiRequest.getOtpId()).isEmpty()) {
+			throw new OtpException("");
+		}
 		if(Objects.equals(otp, totp) 
-				&& Objects.equals(otpDataDetails.getMessageId(), otpId)) 
+				&& Objects.equals(otpDataDetails.getMessageId(), valiRequest.getOtpId())) 
 		{	
 			isValidate = true;
-			userRepository.delete(otpDataDetails);
+			totp = null;
+			otpDataDetails.setValidatedAt(LocalDateTime.now());
+			userRepository.save(otpDataDetails);
 			return ValidationResponce.builder()
 					.status(HttpStatus.OK.value())
 					.message("OTP validated successfully")
@@ -225,7 +160,7 @@ public class OtpServiceImpl implements IOtpService {
 					.message("OTP is already being used for validation")
 					.build();
 		}
-		else if(otpDataDetails.getValidUpto() < valiRequest.getRequeston()) {
+		else if(otpDataDetails.getValidupto().isBefore(LocalDateTime.now())) {
 			return ValidationResponce.builder()
 					.status(HttpStatus.ACCEPTED.value())
 					.message("OTP is expired")
@@ -252,42 +187,42 @@ public class OtpServiceImpl implements IOtpService {
 	public OtpData resend(ResendRequest resendRequest) throws OtpException {
 		resendCount++;
 		validateCount = 0;
+		if(resendRequest.getType().equals("sms") && resendRequest.getTypeValue().contains("@gmail.com")) {
+			throw new OtpException();
+		}
+		if(resendRequest.getType().equals("email") && resendRequest.getTypeValue().length() == 10) {
+			throw new OtpException();
+		}
+
 		if(resendCount > 3) {
 			CompletableFuture.delayedExecutor(120, TimeUnit.SECONDS).execute(() -> resendCount = 0 );
 			throw new OtpException("your service is block for 2mins and resend after 2mins");
 		}
 
-		String otpId =base64Encoding.encode(resendRequest.getLastOtpId());
-
-		userRepository.findByMessageId(otpId).ifPresentOrElse(x -> {
-			UserModel user = new UserModel();
-			validationTime = LocalDateTime.now();
-			if(resendRequest.getUser().getLoggedIn() == 1) {
-				user = UserModel.builder().userId(x.getUser().getUserId()).build();
-
-			}
+		Optional<OtpData> existedOtpData = userRepository.findByMessageId(resendRequest.getLastOtpId());
+		existedOtpData.ifPresentOrElse(x -> {
 
 			//Secret key
-			String secKey = ""+LocalDateTime.now().getNano();
+			String secKey = resendRequest.getRequeston().toString();
 
 			// OTP generate 
-			String otp = Util.generateTOTP256(secKey,secKeyValue , "6");
+			String otp = Util.generateTOTP256(secKey,120 , "6");
 			log.info("OTP is "+otp);
-			totp =base64Encoding.encode(Integer.parseInt(otp));
-		    
-			if(validationTime.plusSeconds(900).isBefore(LocalDateTime.now())) {
-				totp = null;
-				validationTime = LocalDateTime.now().plusSeconds(900);
-			}
-
+			totp =otpUtil.base64encode(Integer.parseInt(otp));
+			CompletableFuture.delayedExecutor(600, TimeUnit.SECONDS).execute(() -> totp = null );
+			int otpId = otpUtil.otpIdGenrate();
+			log.info("OTP id is "+otpId);
 			OtpData newUserModel = OtpData.builder()
+					.id(x.getId())
 					.requestdevice(resendRequest.getRequestdevice())
-					.type(resendRequest.getType())
-					.typeValue(resendRequest.getTypeValue())
-					.user(user)
+					.type(Type.valueOf(resendRequest.getType().toUpperCase()))
+					.typeValue(x.getTypeValue())
+					.user(resendRequest.getUser())
 					.messageId(otpId)
-					.validUpto(resendRequest.getRequeston()+900)
-					.requeston(resendRequest.getRequeston())
+					.validupto(LocalDateTime.now().plusMinutes(10))
+					.requestedAt(LocalDateTime.now())
+					.resendInitiatedAt(LocalDateTime.now())
+					.otpGeneratedAt(LocalDateTime.now())
 					.build();
 			otpData=userRepository.save(newUserModel);
 

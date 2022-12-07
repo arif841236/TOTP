@@ -1,5 +1,6 @@
 package com.indusnet.model;
 
+import java.math.BigInteger;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,7 +23,7 @@ public class UserModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "register_seq")
 	@SequenceGenerator(name = "register_seq", sequenceName = "regis_seq", initialValue = 1001)
-	private Integer userId;
+	private BigInteger userId;
 	private Integer loggedIn;
     
 }

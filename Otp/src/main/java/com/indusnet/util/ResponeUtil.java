@@ -24,8 +24,8 @@ public class ResponeUtil {
 				.messageId(otpData.getMessageId())
 				.status(HttpStatus.OK.value())
 				.otpFor(otpData.getTypeValue())
-				.type(otpData.getType())
-				.validupto(otpData.getValidUpto())
+				.type(otpData.getType().name().toLowerCase())
+				.validupto(otpData.getValidupto().getNano())
 				.build();
 
 	}

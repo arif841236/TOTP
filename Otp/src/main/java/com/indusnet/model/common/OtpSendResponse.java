@@ -16,6 +16,6 @@ public class OtpSendResponse {
 	private String type;
 	private String otpFor;
 	private Integer validupto;
-	private String messageId;
+	private Integer messageId;
 	
 }
