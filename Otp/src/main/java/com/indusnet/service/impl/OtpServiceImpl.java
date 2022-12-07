@@ -50,14 +50,15 @@ public class OtpServiceImpl implements IOtpService {
 
 	@Override
 	public OtpData generateOtp(SendOtpRequest user) throws OtpException {
+		generateCount++;
+		validateCount = 0;
 		if(user.getType().equals("sms") && user.getTypeValue().contains("@gmail.com")) {
 			throw new OtpException();
 		}
 		if(user.getType().equals("email") && user.getTypeValue().length() == 10) {
 			throw new OtpException();
 		}
-		generateCount++;
-		validateCount = 0;
+		
 		if(generateCount > 5) {
 			CompletableFuture.delayedExecutor(300, TimeUnit.SECONDS).execute(() -> generateCount = 0 );
 			throw new OtpException("you exceed the maximum number of attempt.");
