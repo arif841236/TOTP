@@ -1,6 +1,4 @@
 package com.indusnet.model.common;
-
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,12 +8,10 @@ import lombok.Getter;
 @Builder
 @Getter
 public class OtpSendResponse {
-
 	private Integer status;
 	private String message ;
 	private String type;
 	private String otpFor;
 	private Integer validupto;
 	private Integer messageId;
-	
 }

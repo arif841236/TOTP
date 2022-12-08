@@ -1,5 +1,4 @@
 package com.indusnet.util;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.indusnet.model.OtpData;
@@ -12,7 +11,6 @@ import com.indusnet.model.common.OtpSendResponse;
  */
 @Service
 public class ResponeUtil {
-
 	/**
 	 * 
 	 * @param message: this is responce message
@@ -27,7 +25,5 @@ public class ResponeUtil {
 				.type(otpData.getType().name().toLowerCase())
 				.validupto(otpData.getValidupto().getNano())
 				.build();
-
 	}
-
 }

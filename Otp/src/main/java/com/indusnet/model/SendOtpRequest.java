@@ -1,5 +1,4 @@
 package com.indusnet.model;
-
 import com.indusnet.util.EmailOrPhone;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,12 +12,10 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class SendOtpRequest {
-
 	private String type;
 	@EmailOrPhone
 	private String typeValue;
 	private Integer requeston;
 	private String requestdevice;
 	private UserModel user;
-
 }

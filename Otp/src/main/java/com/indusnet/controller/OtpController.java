@@ -1,5 +1,4 @@
 package com.indusnet.controller;
-
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +21,10 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("api/v0.0.1/otp")
 @RequiredArgsConstructor
 public class OtpController {
-
 	@Autowired
 	private IOtpService userService;
-
 	@Autowired
 	Gson gson;
-
 	@Autowired
 	ResponeUtil responseUtil;
 
@@ -42,7 +38,6 @@ public class OtpController {
 	 * @param user: This is user store the name , email , and mobile number
 	 * @return :its return responceEntity of OtpResponseMessage.
 	 */
-
 	@PostMapping("/sendotp")
 	public ResponseEntity<OtpSendResponse> sendOtpHandler(@RequestBody @Valid SendOtpRequest user){
 		OtpData otpData = userService.generateOtp(user);

@@ -1,5 +1,4 @@
 package com.indusnet.model;
-
 import java.math.BigInteger;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,11 +18,9 @@ import lombok.ToString;
 @Entity
 @ToString
 public class UserModel {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "register_seq")
 	@SequenceGenerator(name = "register_seq", sequenceName = "regis_seq", initialValue = 1001)
 	private BigInteger userId;
 	private Integer loggedIn;
-    
 }

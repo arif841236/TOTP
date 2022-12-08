@@ -1,5 +1,4 @@
 package com.indusnet.exception;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Timestamp;
@@ -15,15 +14,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
-import com.indusnet.model.common.ErrorResponce;
-
 /**
  * This class for handle all exception 
  * and its annotate with @ControllerAdvice
  */
 @ControllerAdvice
 public class GlobalExceptions {
-
 	/**
 	 * 
 	 * @param ue : it is OtpException
@@ -34,7 +30,6 @@ public class GlobalExceptions {
 	@ExceptionHandler(OtpException.class)
 	public ResponseEntity<ErrorResponce> userExceptionHandler(
 			OtpException ue,WebRequest wb,Exception e){
-
 		StringWriter stringWriter = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(stringWriter);
 		e.printStackTrace(printWriter);
@@ -42,7 +37,7 @@ public class GlobalExceptions {
 		ErrorResponce error = ErrorResponce.builder()
 				.errorCode(1)
 				.status(HttpStatus.BAD_REQUEST.value())
-			    .errorMessage(HttpStatus.BAD_REQUEST.name())
+				.errorMessage(HttpStatus.BAD_REQUEST.name())
 				.path(wb.getDescription(false))
 				.timestamp(Timestamp.valueOf(LocalDateTime.now()))
 				.traceID(Instant.now().toEpochMilli())
@@ -60,12 +55,9 @@ public class GlobalExceptions {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> validationExceptionMessage(
 			MethodArgumentNotValidException nValid){
-
 		Map<String, String> msgList = new HashMap<>();
 		nValid.getBindingResult().getFieldErrors()
 		.forEach(error -> msgList.put(error.getField(), error.getDefaultMessage()));
 		return new ResponseEntity<>(msgList, HttpStatus.BAD_REQUEST);
 	}
-
-
 }

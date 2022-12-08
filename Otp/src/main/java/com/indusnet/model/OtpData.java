@@ -1,5 +1,4 @@
 package com.indusnet.model;
-
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import javax.persistence.CascadeType;
@@ -23,7 +22,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OtpData {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "otp_seq")
 	@SequenceGenerator(name = "otp_seq", sequenceName = "otp_sequence", initialValue = 2001)

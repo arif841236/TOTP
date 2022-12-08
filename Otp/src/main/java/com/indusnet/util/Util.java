@@ -1,21 +1,17 @@
 package com.indusnet.util;
-
 import java.lang.reflect.UndeclaredThrowableException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.stereotype.Component;
-
 /**
  * This util class for create otp
  * and it have many logic and methods for create otp.
  */
 @Component
 public class Util {
-
 	private static final int[] DIGITSPOWER
-
 	= { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
 
 	/**
@@ -70,10 +66,8 @@ public class Util {
 	public static String generateTOTP256(String key, Integer time, String returnDigits) {
 		String steps ;
 		long t = (time - 0)/30;
-
 		steps = Long.toHexString(t).toUpperCase();
 		while (steps.length() < 16) steps = "0".concat(steps);
-
 		return generateTOTP(key, steps, returnDigits, "HmacSHA256");
 	}
 
@@ -92,24 +86,17 @@ public class Util {
 		String result = null;
 		while (time.length() < 16) 
 			time = "0".concat(time);
-
 		byte[] msg = hexStr2Bytes(time);
 		byte[] k = hexStr2Bytes(key);
 		byte[] hash = hmacSha(crypto, k, msg);
-
 		int offset = hash[hash.length - 1] & 0xf;
-
 		int binary = ((hash[offset] & 0x7f) << 24) | ((hash[offset + 1] & 0xff) << 16)
 				| ((hash[offset + 2] & 0xff) << 8) | (hash[offset + 3] & 0xff);
-
 		int otp = binary % DIGITSPOWER[codeDigits];
-
 		result = Integer.toString(otp);
 		while (result.length() < codeDigits) {
 			result = "3".concat(result);
-
 		}
 		return result;
 	}
-
 }

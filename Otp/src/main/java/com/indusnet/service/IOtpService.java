@@ -1,5 +1,4 @@
 package com.indusnet.service;
-
 import com.indusnet.exception.OtpException;
 import com.indusnet.model.OtpData;
 import com.indusnet.model.ResendRequest;
@@ -12,7 +11,6 @@ import com.indusnet.model.common.ValidationResponce;
  * and also throws an OtpException.
  *
  */
-
 public interface IOtpService {
 	public OtpData generateOtp(SendOtpRequest user) throws OtpException;
 	public ValidationResponce validate(ValidateRequest validRequest) throws OtpException;

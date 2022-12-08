@@ -1,5 +1,4 @@
 package com.indusnet.service.impl;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,11 +25,9 @@ import java.util.concurrent.TimeUnit;
  * and its also Service layer of project.
  *This class have many service logics.
  */
-
 @Service
 @Slf4j
 public class OtpServiceImpl implements IOtpService {
-
 	@Autowired
 	OtpUtil otpUtil;
 	String totp = null;
@@ -40,14 +37,12 @@ public class OtpServiceImpl implements IOtpService {
 	boolean isValidate = false;
 	@Autowired
 	private IOtpRepository userRepository;
+	OtpData otpData = new OtpData();
 
 	/**
 	 * this method is generate the otp and 
 	 * return otp.
 	 */
-
-	OtpData otpData = new OtpData();
-
 	@Override
 	public OtpData generateOtp(SendOtpRequest user) throws OtpException {
 		generateCount++;
@@ -58,27 +53,22 @@ public class OtpServiceImpl implements IOtpService {
 		if(user.getType().equals("email") && user.getTypeValue().length() == 10) {
 			throw new OtpException();
 		}
-		
 		if(generateCount > 5) {
 			CompletableFuture.delayedExecutor(300, TimeUnit.SECONDS).execute(() -> generateCount = 0 );
 			throw new OtpException("you exceed the maximum number of attempt.");
 		}
-
 		Optional<OtpData> existedUser = userRepository.findByTypeValue(user.getTypeValue());
 		existedUser.ifPresentOrElse(x -> {
-
 			//Secret key
-			String secKey = user.getRequeston().toString();
-
+			String secKey = user.getRequeston().toString() +otpUtil.randomValue();
 			log.info("secKey "+secKey);
 			// OTP generate 
 			String otp = Util.generateTOTP256(secKey,120 , "6");
 			log.info("OTP is :"+otp);
 			totp =otpUtil.base64encode(Integer.parseInt(otp));
 			CompletableFuture.delayedExecutor(600, TimeUnit.SECONDS).execute(() -> totp = null );
-			Integer messageId = otpUtil.otpIdGenrate();
+			Integer messageId = otpUtil.randomValue();
 			log.info("otpId is "+messageId);
-
 			OtpData newUserModel = OtpData.builder()
 					.id(x.getId())
 					.messageId(messageId)
@@ -93,20 +83,15 @@ public class OtpServiceImpl implements IOtpService {
 			otpData=userRepository.save(newUserModel);
 		}
 		,() -> {
-
 			//Secret key
-			String secKey = user.getRequeston().toString();
-
+			String secKey = user.getRequeston().toString()+ otpUtil.randomValue();
 			// OTP generate 
 			String otp = Util.generateTOTP256(secKey,120 , "6");
 			log.info("OTP is "+otp);
-
 			totp =otpUtil.base64encode(Integer.parseInt(otp));
 			CompletableFuture.delayedExecutor(600, TimeUnit.SECONDS).execute(() -> totp = null );
-
-			Integer messageId = otpUtil.otpIdGenrate();
+			Integer messageId = otpUtil.randomValue();
 			log.info("otpId is "+messageId);
-
 			OtpData newUserModel = OtpData.builder()
 					.requestdevice(user.getRequestdevice())
 					.type(Type.valueOf(user.getType().toUpperCase()))
@@ -118,9 +103,7 @@ public class OtpServiceImpl implements IOtpService {
 					.requestedAt(LocalDateTime.now())
 					.build();
 			otpData=userRepository.save(newUserModel); 
-
 		});
-
 		return otpData;
 	}
 
@@ -131,14 +114,11 @@ public class OtpServiceImpl implements IOtpService {
 	 */
 	@Override
 	public ValidationResponce validate(ValidateRequest valiRequest) throws OtpException {
-
 		validateCount++;
 		if(validateCount > 3) 
 			throw new OtpException("you crossed maximum attempt for validation. Please resend the OTP for further validation");
-
 		OtpData otpDataDetails=userRepository.getOtpDataByMessageId(valiRequest.getOtpId());
 		String otp =otpUtil.base64encode(valiRequest.getOtp());
-
 		if(userRepository.findByMessageId(valiRequest.getOtpId()).isEmpty()) {
 			throw new OtpException("");
 		}
@@ -176,7 +156,6 @@ public class OtpServiceImpl implements IOtpService {
 		else {
 			throw new OtpException();
 		}
-
 	}
 
 	/**
@@ -194,24 +173,20 @@ public class OtpServiceImpl implements IOtpService {
 		if(resendRequest.getType().equals("email") && resendRequest.getTypeValue().length() == 10) {
 			throw new OtpException();
 		}
-
 		if(resendCount > 3) {
 			CompletableFuture.delayedExecutor(120, TimeUnit.SECONDS).execute(() -> resendCount = 0 );
 			throw new OtpException("your service is block for 2mins and resend after 2mins");
 		}
-
 		Optional<OtpData> existedOtpData = userRepository.findByMessageId(resendRequest.getLastOtpId());
 		existedOtpData.ifPresentOrElse(x -> {
-
 			//Secret key
-			String secKey = resendRequest.getRequeston().toString();
-
+			String secKey = resendRequest.getRequeston().toString() + otpUtil.randomValue();
 			// OTP generate 
 			String otp = Util.generateTOTP256(secKey,120 , "6");
 			log.info("OTP is "+otp);
 			totp =otpUtil.base64encode(Integer.parseInt(otp));
 			CompletableFuture.delayedExecutor(600, TimeUnit.SECONDS).execute(() -> totp = null );
-			int otpId = otpUtil.otpIdGenrate();
+			int otpId = otpUtil.randomValue();
 			log.info("OTP id is "+otpId);
 			OtpData newUserModel = OtpData.builder()
 					.id(x.getId())
@@ -226,12 +201,9 @@ public class OtpServiceImpl implements IOtpService {
 					.otpGeneratedAt(LocalDateTime.now())
 					.build();
 			otpData=userRepository.save(newUserModel);
-
 		}, () -> {
 			throw new OtpException();
 		});
-
 		return otpData;
 	}
-
 }

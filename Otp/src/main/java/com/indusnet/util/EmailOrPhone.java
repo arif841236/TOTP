@@ -1,19 +1,15 @@
 package com.indusnet.util;
-
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import javax.validation.ReportAsSingleViolation;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
 import org.hibernate.validator.constraints.CompositionType;
 import org.hibernate.validator.constraints.ConstraintComposition;
 
@@ -28,7 +24,7 @@ import org.hibernate.validator.constraints.ConstraintComposition;
 @ReportAsSingleViolation
 @Documented
 public @interface EmailOrPhone {
-    String message() default "Provided value was neither a valid Email nor a valid Phone number";
-    Class<?>[] groups() default {};
-    Class<? extends Payload>[] payload() default {  };
+	String message() default "Provided value was neither a valid Email nor a valid Phone number";
+	Class<?>[] groups() default {};
+	Class<? extends Payload>[] payload() default {  };
 }
