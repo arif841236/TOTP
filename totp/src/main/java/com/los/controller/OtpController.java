@@ -42,7 +42,7 @@ public class OtpController {
 			@ApiResponse(code = 403, message = "Accessing the generate otp you were trying to reach is forbidden"),
 			@ApiResponse(code = 404, message = "Not authorized to generate otp") })
 	@ApiOperation(value="Generate otp",tags = "Validate otp",notes = "Send otp to the user",response = OtpResponse.class)
-	@PostMapping
+	@PostMapping("/")
 	public ResponseEntity<Object> generateOtp(@RequestBody @Valid OtpRequestModel requestParameter) {
 		log.info("model is " + requestParameter);
 		if (requestParameter.getOperationType().equalsIgnoreCase("Generate")) {

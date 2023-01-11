@@ -37,6 +37,9 @@ public class OtpServiceImpl implements IOtpService {
 	 */
 	@Autowired
 	IOtpRepository otpRepository;
+	String generated = "GENERATED";
+	String failed = "FAILED";
+	String createdBy = "System";
 	@Autowired
 	ITemplateRepository iTemplateRepository;
 
@@ -85,7 +88,7 @@ public class OtpServiceImpl implements IOtpService {
 
 		String processName = ProcessName.valueOf(otpRequestModel.getProcessName().toUpperCase()).name();
 		List<OtpModel> otpModelExisted2 = otpRepository.getOtpModel(LocalDateTime.now().minusMinutes(10),
-				otpRequestModel.getMobile(), "GENERATED", processName);
+				otpRequestModel.getMobile(), generated, processName);
 		log.info("otp model list " + otpModelExisted2);
 		if (otpModelExisted2.size() >= 3 && otpModelExisted2.get(otpModelExisted2.size() - 1).getCreatedOn()
 				.plusMinutes(10).isAfter(LocalDateTime.now())) {
@@ -125,9 +128,9 @@ public class OtpServiceImpl implements IOtpService {
 		 */
 		String otpId = UUID.randomUUID().toString().substring(0, 8);
 		OtpModel newModel = OtpModel.builder().countryCode(Long.parseLong(otpRequestModel.getCountryCode()))
-				.mobileNumber(otpRequestModel.getMobile()).createdBy("System").createdOn(LocalDateTime.now())
+				.mobileNumber(otpRequestModel.getMobile()).createdBy(createdBy).createdOn(LocalDateTime.now())
 				.otpId(otpId).processName(ProcessName.valueOf(otpRequestModel.getProcessName().toUpperCase()).name())
-				.status("GENERATED").build();
+				.status(generated).build();
 		otpRepository.save(newModel);
 		KafkaResponse kafkaResponse = KafkaResponse.builder().countryCode(otpRequestModel.getCountryCode())
 				.generatedTime(newModel.getCreatedOn().toString()).mobile(otpRequestModel.getMobile()).otp(otp)
@@ -204,7 +207,7 @@ public class OtpServiceImpl implements IOtpService {
 			}
 
 			OtpModel newModel = OtpModel.builder().countryCode(Long.parseLong(otpValidationModel.getCountryCode()))
-					.mobileNumber(otpValidationModel.getMobile()).createdBy("System")
+					.mobileNumber(otpValidationModel.getMobile()).createdBy(createdBy)
 					.createdOn(otpModelData.getCreatedOn()).otpId(otpValidationModel.getOtpId())
 					.processName(otpValidationModel.getProcessName().toUpperCase()).status("VERIFIED").build();
 			otpRepository.save(newModel);
@@ -213,9 +216,9 @@ public class OtpServiceImpl implements IOtpService {
 		} else if (dateTime.plusSeconds(180).isBefore(LocalDateTime.now())
 				&& otp.equals(otpValidationModel.getGeneratedOtp())) {
 			OtpModel newModel = OtpModel.builder().countryCode(Long.parseLong(otpValidationModel.getCountryCode()))
-					.mobileNumber(otpValidationModel.getMobile()).createdBy("System")
+					.mobileNumber(otpValidationModel.getMobile()).createdBy(createdBy)
 					.createdOn(otpModelData.getCreatedOn()).otpId(otpValidationModel.getOtpId())
-					.processName(otpValidationModel.getProcessName().toUpperCase()).status("FAILED").build();
+					.processName(otpValidationModel.getProcessName().toUpperCase()).status(failed).build();
 			otpRepository.save(newModel);
 			return ValidationResponce.builder().status(HttpStatus.UNPROCESSABLE_ENTITY.value())
 					.message("Otp is expired").build();
@@ -225,9 +228,9 @@ public class OtpServiceImpl implements IOtpService {
 				throw new ValidationException("too many attaemps. Please regeneate the otp for further validation.");
 			}
 			OtpModel newModel = OtpModel.builder().countryCode(Long.parseLong(otpValidationModel.getCountryCode()))
-					.mobileNumber(otpValidationModel.getMobile()).createdBy("System")
+					.mobileNumber(otpValidationModel.getMobile()).createdBy(createdBy)
 					.createdOn(otpModelData.getCreatedOn()).otpId(otpValidationModel.getOtpId())
-					.processName(otpValidationModel.getProcessName().toUpperCase()).status("FAILED").build();
+					.processName(otpValidationModel.getProcessName().toUpperCase()).status(failed).build();
 			otpRepository.save(newModel);
 			return ValidationResponce.builder().status(HttpStatus.UNPROCESSABLE_ENTITY.value()).message("Invalid otp")
 					.build();
