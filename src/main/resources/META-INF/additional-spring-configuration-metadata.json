@@ -1,0 +1,72 @@
+{"properties": [
+  {
+    "name": "otp.generated",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.generated'"
+  },
+  {
+    "name": "otp.verified",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.verified'"
+  },
+  {
+    "name": "otp.failed",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.failed'"
+  },
+  {
+    "name": "otp.createdby",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.createdby'"
+  },
+  {
+    "name": "otp.generate.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.generate.msg'"
+  },
+  {
+    "name": "otp.validate.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.validate.msg'"
+  },
+  {
+    "name": "otp.expire.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.expire.msg'"
+  },
+  {
+    "name": "otp.invalid.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.invalid.msg'"
+  },
+  {
+    "name": "otp.exceed.verified.attempt.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.exceed.verified.attempt.msg'"
+  },
+  {
+    "name": "otp.verifieds.before.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.verifieds.before.msg'"
+  },
+  {
+    "name": "otp.notgenerated.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.notgenerated.msg'"
+  },
+  {
+    "name": "otp.datetime.formate.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.datetime.formate.msg'"
+  },
+  {
+    "name": "otp.operationtype.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.operationtype.msg'"
+  },
+  {
+    "name": "otp.generate.exceed.msg",
+    "type": "java.lang.String",
+    "description": "A description for 'otp.generate.exceed.msg'"
+  }
+]}
